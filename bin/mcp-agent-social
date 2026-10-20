@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+
+// ABOUTME: Executable entry point for npx usage
+// ABOUTME: Starts the MCP Agent Social Media Server
+
+import { existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const distPath = join(__dirname, '..', 'dist', 'index.js');
+
+// Check if built files exist, if not, try to build them
+if (!existsSync(distPath)) {
+  process.stderr.write('Building project...\n');
+  try {
+    execSync('npm run build', { cwd: join(__dirname, '..'), stdio: 'inherit' });
+  } catch (error) {
+    process.stderr.write('Failed to build project. Please run "npm run build" manually.\n');
+    process.exit(1);
+  }
+}
+
+// Now import the main module
+import('../dist/index.js').catch((error) => {
+  process.stderr.write(`Failed to start MCP Agent Social Server: ${error.message}\n`);
+  process.exit(1);
+});
